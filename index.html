@@ -8,22 +8,21 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg: #0f0f0f;
-      --bg2: #1a1a1a;
-      --bg3: #242424;
-      --border: rgba(255,255,255,0.08);
-      --border2: rgba(255,255,255,0.15);
-      --text: #f0f0f0;
-      --text2: #999;
-      --text3: #555;
-      --green: #4ade80;
-      --green-bg: rgba(74,222,128,0.1);
-      --red: #f87171;
-      --red-bg: rgba(248,113,113,0.1);
-      --amber: #fbbf24;
-      --amber-bg: rgba(251,191,36,0.1);
-      --blue: #60a5fa;
-      --blue-bg: rgba(96,165,250,0.1);
+      --bg: #f5f4f0;
+      --bg2: #ffffff;
+      --bg3: #f0efe9;
+      --border: rgba(0,0,0,0.08);
+      --border2: rgba(0,0,0,0.18);
+      --text: #1a1a1a;
+      --text2: #666;
+      --text3: #aaa;
+      --green: #16a34a;
+      --green-bg: #dcfce7;
+      --red: #dc2626;
+      --red-bg: #fee2e2;
+      --amber: #b45309;
+      --amber-bg: #fef3c7;
+      --blue: #2563eb;
       --vipps: #FF5B24;
       --radius: 10px;
       --radius-sm: 6px;
@@ -34,140 +33,49 @@
       color: var(--text);
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       min-height: 100vh;
-      padding: 0;
     }
 
-    .app {
-      max-width: 540px;
-      margin: 0 auto;
-      padding: 24px 16px 60px;
-    }
+    .app { max-width: 540px; margin: 0 auto; padding: 24px 16px 60px; }
 
-    /* Header */
-    .header {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      margin-bottom: 24px;
-    }
+    .header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 24px; }
     .header-title { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
     .header-sub { font-size: 13px; color: var(--text2); margin-top: 3px; }
-    .reset-btn {
-      background: none;
-      border: 1px solid var(--border2);
-      color: var(--text2);
-      border-radius: var(--radius-sm);
-      padding: 6px 12px;
-      font-size: 12px;
-      cursor: pointer;
-      transition: all 0.15s;
-    }
+    .reset-btn { background: none; border: 1px solid var(--border2); color: var(--text2); border-radius: var(--radius-sm); padding: 6px 12px; font-size: 12px; cursor: pointer; transition: all 0.15s; }
     .reset-btn:hover { border-color: var(--red); color: var(--red); }
 
-    /* Summary */
-    .summary {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-      margin-bottom: 24px;
-    }
-    .metric {
-      background: var(--bg2);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 12px 14px;
-    }
+    .summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 24px; }
+    .metric { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 14px; }
     .metric-label { font-size: 11px; color: var(--text3); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
-    .metric-value { font-size: 20px; font-weight: 700; color: var(--text); }
+    .metric-value { font-size: 20px; font-weight: 700; }
     .metric-value.green { color: var(--green); }
     .metric-value.amber { color: var(--amber); }
 
-    /* Add player */
-    .section-label {
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--text3);
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      margin-bottom: 8px;
-    }
-    .add-row {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 24px;
-    }
+    .section-label { font-size: 11px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px; }
+    .add-row { display: flex; gap: 8px; margin-bottom: 24px; }
+
     input[type="text"], input[type="number"], select {
-      background: var(--bg2);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      color: var(--text);
-      font-size: 14px;
-      padding: 0 12px;
-      height: 40px;
-      outline: none;
-      transition: border-color 0.15s;
-      width: 100%;
+      background: var(--bg2); border: 1px solid var(--border2); border-radius: var(--radius-sm);
+      color: var(--text); font-size: 14px; padding: 0 12px; height: 40px; outline: none;
+      transition: border-color 0.15s; width: 100%;
     }
-    input[type="text"]:focus, input[type="number"]:focus, select:focus {
-      border-color: var(--border2);
-    }
+    input:focus, select:focus { border-color: #999; }
     input::placeholder { color: var(--text3); }
-    select option { background: #1a1a1a; }
 
-    button.primary {
-      background: var(--text);
-      color: #000;
-      border: none;
-      border-radius: var(--radius-sm);
-      padding: 0 18px;
-      height: 40px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      white-space: nowrap;
-      transition: opacity 0.15s;
-      flex-shrink: 0;
-    }
-    button.primary:hover { opacity: 0.85; }
+    button.primary { background: var(--text); color: #fff; border: none; border-radius: var(--radius-sm); padding: 0 18px; height: 40px; font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap; flex-shrink: 0; transition: opacity 0.15s; }
+    button.primary:hover { opacity: 0.8; }
 
-    /* Player cards */
     .players-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 24px; }
     .empty-state { font-size: 13px; color: var(--text3); padding: 8px 0; }
 
-    .player-card {
-      background: var(--bg2);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      overflow: hidden;
-      transition: opacity 0.2s;
-    }
+    .player-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; transition: opacity 0.2s; }
     .player-card.inactive { opacity: 0.5; }
+    .player-header { display: flex; align-items: center; gap: 10px; padding: 12px 14px; cursor: pointer; user-select: none; }
+    .player-header:hover { background: rgba(0,0,0,0.01); }
 
-    .player-header {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 12px 14px;
-      cursor: pointer;
-      user-select: none;
-    }
-    .player-header:hover { background: rgba(255,255,255,0.02); }
-
-    .avatar {
-      width: 36px; height: 36px;
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 13px; font-weight: 700;
-      flex-shrink: 0;
-    }
-
+    .avatar { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; flex-shrink: 0; }
     .player-name { font-size: 14px; font-weight: 600; flex: 1; }
     .player-badges { display: flex; gap: 4px; flex-wrap: wrap; }
-    .badge {
-      font-size: 10px; font-weight: 600;
-      padding: 2px 7px;
-      border-radius: 20px;
-    }
+    .badge { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 20px; }
     .badge-vipps { background: var(--vipps); color: #fff; }
     .badge-cash { background: var(--green-bg); color: var(--green); }
     .badge-mixed { background: var(--amber-bg); color: var(--amber); }
@@ -177,131 +85,46 @@
     .player-right { text-align: right; flex-shrink: 0; }
     .player-inn { font-size: 13px; font-weight: 600; }
     .player-net { font-size: 11px; margin-top: 1px; }
-    .pos { color: var(--green); }
-    .neg { color: var(--red); }
-    .neu { color: var(--text3); }
-
+    .pos { color: var(--green); } .neg { color: var(--red); } .neu { color: var(--text3); }
     .chevron { font-size: 10px; color: var(--text3); margin-left: 4px; transition: transform 0.2s; flex-shrink: 0; }
     .chevron.open { transform: rotate(180deg); }
 
-    /* Player body */
     .player-body { border-top: 1px solid var(--border); padding: 12px 14px; }
-
-    .tx-list { display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px; }
-    .tx-row {
-      display: flex; align-items: center; gap: 8px;
-      font-size: 13px; color: var(--text2);
-      padding: 4px 0;
-      border-bottom: 1px solid var(--border);
-    }
+    .tx-list { display: flex; flex-direction: column; margin-bottom: 10px; }
+    .tx-row { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text2); padding: 5px 0; border-bottom: 1px solid var(--border); }
     .tx-row:last-child { border-bottom: none; }
-    .tx-icon { font-size: 12px; width: 14px; flex-shrink: 0; }
+    .tx-icon { font-size: 12px; width: 14px; flex-shrink: 0; color: var(--text3); }
     .tx-label { flex: 1; }
     .tx-amount { font-weight: 600; color: var(--text); }
     .tx-amount.out { color: var(--red); }
     .tx-time { font-size: 11px; color: var(--text3); }
     .del { background: none; border: none; color: var(--text3); cursor: pointer; font-size: 14px; padding: 0 2px; border-radius: 4px; line-height: 1; }
     .del:hover { color: var(--red); }
-
     .divider { height: 1px; background: var(--border); margin: 10px 0; }
 
-    .actions-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-      margin-bottom: 8px;
-    }
-    .action-box {
-      background: var(--bg3);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      padding: 10px;
-    }
-    .action-label {
-      font-size: 10px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      margin-bottom: 8px;
-    }
-    .action-label.green { color: var(--green); }
-    .action-label.red { color: var(--red); }
+    .actions-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+    .action-box { background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px; }
+    .action-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px; }
+    .action-label.green { color: var(--green); } .action-label.red { color: var(--red); }
     .action-inputs { display: flex; gap: 5px; }
     .action-inputs input { height: 34px; font-size: 13px; }
     .action-inputs select { height: 34px; font-size: 13px; width: auto; flex-shrink: 0; }
-    .ok-btn {
-      background: var(--bg2);
-      border: 1px solid var(--border2);
-      color: var(--text);
-      border-radius: var(--radius-sm);
-      padding: 0 10px;
-      height: 34px;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      white-space: nowrap;
-      flex-shrink: 0;
-      transition: background 0.15s;
-    }
+    .ok-btn { background: var(--bg2); border: 1px solid var(--border2); color: var(--text); border-radius: var(--radius-sm); padding: 0 10px; height: 34px; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; flex-shrink: 0; transition: background 0.15s; }
     .ok-btn:hover { background: var(--bg3); }
 
-    .leave-row {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      padding-top: 8px;
-      border-top: 1px solid var(--border);
-    }
-    .leave-btn {
-      background: none;
-      border: 1px solid var(--border);
-      color: var(--text2);
-      border-radius: var(--radius-sm);
-      padding: 6px 12px;
-      font-size: 12px;
-      cursor: pointer;
-      transition: all 0.15s;
-      flex: 1;
-    }
+    .leave-row { display: flex; gap: 8px; flex-wrap: wrap; padding-top: 8px; border-top: 1px solid var(--border); }
+    .leave-btn { background: none; border: 1px solid var(--border2); color: var(--text2); border-radius: var(--radius-sm); padding: 6px 12px; font-size: 12px; cursor: pointer; flex: 1; transition: all 0.15s; }
     .leave-btn:hover { border-color: var(--red); color: var(--red); }
 
-    .inactive-row {
-      display: flex;
-      align-items: center;
-      padding-top: 8px;
-      border-top: 1px solid var(--border);
-    }
-    .undo-btn {
-      background: none; border: none;
-      color: var(--blue);
-      font-size: 12px; cursor: pointer; padding: 4px 0;
-    }
+    .inactive-row { display: flex; align-items: center; padding-top: 8px; border-top: 1px solid var(--border); }
+    .undo-btn { background: none; border: none; color: var(--blue); font-size: 12px; cursor: pointer; padding: 4px 0; }
     .undo-btn:hover { text-decoration: underline; }
-    .hard-del-btn {
-      background: none; border: none;
-      color: var(--text3);
-      font-size: 12px; cursor: pointer; padding: 4px 0;
-      margin-left: auto;
-    }
+    .hard-del-btn { background: none; border: none; color: var(--text3); font-size: 12px; cursor: pointer; padding: 4px 0; margin-left: auto; }
     .hard-del-btn:hover { color: var(--red); }
 
-    .bust-notice {
-      background: var(--red-bg);
-      border: 1px solid rgba(248,113,113,0.2);
-      border-radius: var(--radius-sm);
-      padding: 8px 10px;
-      font-size: 12px;
-      color: var(--red);
-      margin-bottom: 8px;
-    }
+    .bust-notice { background: var(--red-bg); border: 1px solid rgba(220,38,38,0.15); border-radius: var(--radius-sm); padding: 8px 10px; font-size: 12px; color: var(--red); margin-bottom: 8px; }
 
-    /* Log */
-    .log-box {
-      background: var(--bg2);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 12px 14px;
-    }
+    .log-box { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 14px; }
     .log-entry { font-size: 12px; color: var(--text2); padding: 4px 0; border-bottom: 1px solid var(--border); }
     .log-entry:last-child { border-bottom: none; }
     .log-time { color: var(--text3); margin-right: 6px; }
@@ -319,18 +142,9 @@
   </div>
 
   <div class="summary">
-    <div class="metric">
-      <div class="metric-label">Spillere</div>
-      <div class="metric-value" id="stat-players">0</div>
-    </div>
-    <div class="metric">
-      <div class="metric-label">Pott</div>
-      <div class="metric-value green" id="stat-total">0 kr</div>
-    </div>
-    <div class="metric">
-      <div class="metric-label">Vipps/Cash</div>
-      <div class="metric-value amber" id="stat-split">0/0</div>
-    </div>
+    <div class="metric"><div class="metric-label">Spillere</div><div class="metric-value" id="stat-players">0</div></div>
+    <div class="metric"><div class="metric-label">Pott</div><div class="metric-value green" id="stat-total">0 kr</div></div>
+    <div class="metric"><div class="metric-label">Vipps / Cash</div><div class="metric-value amber" id="stat-split">0 / 0</div></div>
   </div>
 
   <div class="section-label">Legg til spiller</div>
@@ -351,12 +165,12 @@
   if (!state.started) state.started = Date.now();
 
   const avatarColors = [
-    { bg: '#1e3a5f', tx: '#60a5fa' },
-    { bg: '#1a3a2a', tx: '#4ade80' },
-    { bg: '#3a1a1a', tx: '#f87171' },
-    { bg: '#2a1a3a', tx: '#c084fc' },
-    { bg: '#3a2a1a', tx: '#fbbf24' },
-    { bg: '#1a3a3a', tx: '#34d399' },
+    { bg: '#dbeafe', tx: '#1d4ed8' },
+    { bg: '#dcfce7', tx: '#15803d' },
+    { bg: '#fee2e2', tx: '#b91c1c' },
+    { bg: '#f3e8ff', tx: '#7e22ce' },
+    { bg: '#fef3c7', tx: '#92400e' },
+    { bg: '#ccfbf1', tx: '#0f766e' },
   ];
 
   function save() { localStorage.setItem('poker_state', JSON.stringify(state)); }
@@ -364,20 +178,18 @@
   function colorFor(i) { return avatarColors[i % avatarColors.length]; }
   function nowStr() { return new Date().toLocaleTimeString('no-NO',{hour:'2-digit',minute:'2-digit'}); }
   function log(msg) { state.log.unshift({t: nowStr(), msg}); if(state.log.length>40) state.log.pop(); }
+  function fmt(n) { return Math.round(n).toLocaleString('no-NO') + ' kr'; }
 
   function addPlayer() {
     const inp = document.getElementById('new-name');
     const name = inp.value.trim();
     if (!name) return;
     if (state.players.find(p=>p.name.toLowerCase()===name.toLowerCase())) {
-      inp.style.outline = '2px solid var(--red)';
-      setTimeout(()=>inp.style.outline='', 1200);
-      return;
+      inp.style.outline = '2px solid var(--red)'; setTimeout(()=>inp.style.outline='', 1200); return;
     }
     state.players.push({ id: Date.now(), name, txs: [], expanded: true, status: 'active' });
     log(`${name} ble lagt til bordet`);
-    inp.value = '';
-    save(); render();
+    inp.value = ''; save(); render();
   }
 
   function togglePlayer(id) {
@@ -425,9 +237,8 @@
     if (!p) return;
     const inn = p.txs.filter(t=>t.kind==='inn').reduce((s,t)=>s+t.amount,0);
     const ut = p.txs.filter(t=>t.kind==='ut').reduce((s,t)=>s+t.amount,0);
-    const lost = inn - ut;
     p.status = 'bust'; p.expanded = false;
-    log(`${p.name} forlot bordet og tapte ${fmt(lost)} – pengene er i potten`);
+    log(`${p.name} forlot bordet og tapte ${fmt(inn-ut)} – pengene er i potten`);
     save(); render();
   }
 
@@ -461,8 +272,6 @@
     save(); render();
   }
 
-  function fmt(n) { return Math.round(n).toLocaleString('no-NO') + ' kr'; }
-
   function render() {
     const allTxs = state.players.flatMap(p=>p.txs);
     const totalIn = allTxs.filter(t=>t.kind==='inn').reduce((s,t)=>s+t.amount,0);
@@ -473,14 +282,11 @@
 
     document.getElementById('stat-players').textContent = active + '/' + state.players.length;
     document.getElementById('stat-total').textContent = fmt(totalIn - totalOut);
-    document.getElementById('stat-split').textContent = Math.round(vipps).toLocaleString('no-NO') + '/' + Math.round(cash).toLocaleString('no-NO');
-
-    const started = new Date(state.started);
-    document.getElementById('session-time').textContent = 'Startet ' + started.toLocaleTimeString('no-NO',{hour:'2-digit',minute:'2-digit'});
+    document.getElementById('stat-split').textContent = Math.round(vipps).toLocaleString('no-NO') + ' / ' + Math.round(cash).toLocaleString('no-NO');
+    document.getElementById('session-time').textContent = 'Startet ' + new Date(state.started).toLocaleTimeString('no-NO',{hour:'2-digit',minute:'2-digit'});
 
     const list = document.getElementById('players-list');
     list.innerHTML = '';
-
     if (state.players.length === 0) {
       list.innerHTML = '<div class="empty-state">Ingen spillere enda – legg til noen over.</div>';
     }
@@ -523,10 +329,7 @@
           <div class="action-box">
             <div class="action-label green">+ Innkjøp</div>
             <div class="action-inputs">
-              <select id="bi-m-${p.id}">
-                <option value="Vipps">Vipps</option>
-                <option value="Cash">Cash</option>
-              </select>
+              <select id="bi-m-${p.id}"><option value="Vipps">Vipps</option><option value="Cash">Cash</option></select>
               <input type="number" id="bi-a-${p.id}" placeholder="kr" min="0" step="50" onkeydown="if(event.key==='Enter')addBuyin(${p.id})" />
               <button class="ok-btn" onclick="addBuyin(${p.id})">OK</button>
             </div>
