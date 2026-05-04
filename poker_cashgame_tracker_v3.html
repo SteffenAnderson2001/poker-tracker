@@ -1,0 +1,353 @@
+
+<h2 class="sr-only">Poker cashgame tracker – innkjøp, uttak og forlat bordet</h2>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  .root { padding: 1rem 0; font-family: var(--font-sans); }
+  .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
+  .title { font-size: 18px; font-weight: 500; color: var(--color-text-primary); }
+  .subtitle { font-size: 13px; color: var(--color-text-secondary); margin-top: 2px; }
+  .summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 1.5rem; }
+  .metric { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 12px 14px; }
+  .metric-label { font-size: 12px; color: var(--color-text-secondary); margin-bottom: 4px; }
+  .metric-value { font-size: 22px; font-weight: 500; color: var(--color-text-primary); }
+  .metric-value.green { color: var(--color-text-success); }
+  .metric-value.amber { color: var(--color-text-warning); }
+  .section-label { font-size: 12px; font-weight: 500; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px; }
+  .add-player-row { display: flex; gap: 8px; margin-bottom: 1.5rem; }
+  .add-player-row input { flex: 1; }
+  .players-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 1.5rem; }
+  .player-card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); overflow: hidden; }
+  .player-card.left { opacity: 0.55; }
+  .player-header { display: flex; align-items: center; gap: 10px; padding: 10px 14px; cursor: pointer; user-select: none; }
+  .player-avatar { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 500; flex-shrink: 0; }
+  .player-name { font-size: 14px; font-weight: 500; color: var(--color-text-primary); flex: 1; }
+  .player-right { text-align: right; }
+  .player-total { font-size: 14px; font-weight: 500; color: var(--color-text-primary); }
+  .player-net { font-size: 11px; }
+  .player-net.pos { color: var(--color-text-success); }
+  .player-net.neg { color: var(--color-text-danger); }
+  .player-net.zero { color: var(--color-text-tertiary); }
+  .player-badges { display: flex; gap: 5px; flex-wrap: wrap; }
+  .badge { font-size: 11px; padding: 2px 7px; border-radius: 20px; font-weight: 500; }
+  .badge-vipps { background: #FF5B24; color: #fff; }
+  .badge-cash { background: var(--color-background-success); color: var(--color-text-success); }
+  .badge-mixed { background: var(--color-background-warning); color: var(--color-text-warning); }
+  .badge-out { background: var(--color-background-secondary); color: var(--color-text-secondary); border: 0.5px solid var(--color-border-secondary); }
+  .badge-bust { background: var(--color-background-danger); color: var(--color-text-danger); }
+  .chevron { font-size: 11px; color: var(--color-text-tertiary); transition: transform 0.2s; margin-left: 4px; }
+  .chevron.open { transform: rotate(180deg); }
+  .player-body { border-top: 0.5px solid var(--color-border-tertiary); padding: 10px 14px; }
+  .tx-list { display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px; }
+  .tx-row { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+  .tx-type { min-width: 16px; color: var(--color-text-tertiary); }
+  .tx-method { color: var(--color-text-secondary); min-width: 55px; }
+  .tx-amount { font-weight: 500; min-width: 70px; }
+  .tx-amount.out { color: var(--color-text-danger); }
+  .tx-time { color: var(--color-text-tertiary); font-size: 12px; flex: 1; }
+  .del-btn { background: none; border: none; color: var(--color-text-tertiary); cursor: pointer; font-size: 14px; padding: 0 2px; border-radius: 4px; }
+  .del-btn:hover { color: var(--color-text-danger); }
+  .actions-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+  .action-box { border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); padding: 8px 10px; }
+  .action-title { font-size: 11px; font-weight: 500; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .action-title.buyin-title { color: var(--color-text-success); }
+  .action-title.cashout-title { color: var(--color-text-danger); }
+  .action-inputs { display: flex; gap: 5px; align-items: center; }
+  .action-inputs select, .action-inputs input { font-size: 13px; }
+  .action-inputs input { width: 80px; }
+  .action-inputs button { font-size: 12px; padding: 0 8px; white-space: nowrap; }
+  .leave-section { border-top: 0.5px solid var(--color-border-tertiary); padding-top: 8px; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .leave-btn { background: none; border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); color: var(--color-text-secondary); font-size: 12px; cursor: pointer; padding: 4px 10px; }
+  .leave-btn:hover { border-color: var(--color-border-danger); color: var(--color-text-danger); }
+  .undo-btn { background: none; border: none; color: var(--color-text-info); font-size: 12px; cursor: pointer; padding: 4px 0; }
+  .delete-btn { background: none; border: none; color: var(--color-text-tertiary); font-size: 12px; cursor: pointer; padding: 4px 0; margin-left: auto; }
+  .delete-btn:hover { color: var(--color-text-danger); }
+  .divider { height: 0.5px; background: var(--color-border-tertiary); margin: 8px 0; }
+  .bust-notice { font-size: 12px; color: var(--color-text-danger); background: var(--color-background-danger); border-radius: var(--border-radius-md); padding: 6px 10px; margin-bottom: 8px; }
+  .log-section { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 12px 14px; }
+  .log-entry { font-size: 12px; color: var(--color-text-secondary); padding: 3px 0; border-bottom: 0.5px solid var(--color-border-tertiary); }
+  .log-entry:last-child { border-bottom: none; }
+  .log-empty { font-size: 12px; color: var(--color-text-tertiary); }
+</style>
+
+<div class="root">
+  <div class="header">
+    <div>
+      <div class="title">Poker cashgame</div>
+      <div class="subtitle" id="session-time"></div>
+    </div>
+    <button onclick="resetAll()" style="font-size:12px;">Ny session</button>
+  </div>
+
+  <div class="summary-grid">
+    <div class="metric">
+      <div class="metric-label">Ved bordet</div>
+      <div class="metric-value" id="stat-players">0</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Total pott</div>
+      <div class="metric-value green" id="stat-total">0 kr</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Vipps / Cash</div>
+      <div class="metric-value amber" id="stat-split">0 / 0</div>
+    </div>
+  </div>
+
+  <div class="section-label">Legg til spiller</div>
+  <div class="add-player-row">
+    <input type="text" id="new-player-input" placeholder="Navn..." onkeydown="if(event.key==='Enter')addPlayer()" />
+    <button onclick="addPlayer()">Legg til</button>
+  </div>
+
+  <div class="section-label">Spillere</div>
+  <div class="players-list" id="players-list"></div>
+
+  <div class="section-label" style="margin-top:1rem;">Aktivitetslogg</div>
+  <div class="log-section" id="log-section"><div class="log-empty">Ingen aktivitet enda.</div></div>
+</div>
+
+<script>
+let state = { players: [], log: [] };
+
+function initials(name) {
+  return name.trim().split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+}
+function colorFor(idx) {
+  const ramps = [
+    {bg:'var(--color-background-info)',tx:'var(--color-text-info)'},
+    {bg:'var(--color-background-success)',tx:'var(--color-text-success)'},
+    {bg:'var(--color-background-warning)',tx:'var(--color-text-warning)'},
+    {bg:'var(--color-background-danger)',tx:'var(--color-text-danger)'},
+  ];
+  return ramps[idx % ramps.length];
+}
+function now() {
+  return new Date().toLocaleTimeString('no-NO',{hour:'2-digit',minute:'2-digit'});
+}
+function addLog(msg) {
+  state.log.unshift({ time: now(), msg });
+  if (state.log.length > 30) state.log.pop();
+}
+
+function addPlayer() {
+  const inp = document.getElementById('new-player-input');
+  const name = inp.value.trim();
+  if (!name) return;
+  if (state.players.find(p=>p.name.toLowerCase()===name.toLowerCase())) {
+    inp.style.outline='2px solid var(--color-border-danger)';
+    setTimeout(()=>inp.style.outline='',1000);
+    return;
+  }
+  // status: 'active' | 'left' | 'bust'
+  state.players.push({ id: Date.now(), name, transactions: [], expanded: true, status: 'active' });
+  addLog(`${name} ble lagt til bordet`);
+  inp.value = '';
+  render();
+}
+
+function hardDelete(id) {
+  state.players = state.players.filter(x=>x.id!==id);
+  render();
+}
+
+function togglePlayer(id) {
+  const p = state.players.find(x=>x.id===id);
+  if (p) { p.expanded = !p.expanded; render(); }
+}
+
+function addBuyin(id) {
+  const p = state.players.find(x=>x.id===id);
+  if (!p || p.status !== 'active') return;
+  const method = document.getElementById(`bi-method-${id}`).value;
+  const amount = parseFloat(document.getElementById(`bi-amount-${id}`).value);
+  if (!amount || amount <= 0) return;
+  p.transactions.push({ id: Date.now(), kind: 'inn', method, amount, time: now() });
+  addLog(`${p.name} kjøpte inn ${amount.toLocaleString('no-NO')} kr via ${method}`);
+  document.getElementById(`bi-amount-${id}`).value = '';
+  render();
+}
+
+function addCashout(id) {
+  const p = state.players.find(x=>x.id===id);
+  if (!p || p.status !== 'active') return;
+  const amount = parseFloat(document.getElementById(`co-amount-${id}`).value);
+  if (!amount || amount <= 0) return;
+  const totalIn = p.transactions.filter(t=>t.kind==='inn').reduce((s,t)=>s+t.amount,0);
+  const totalOut = p.transactions.filter(t=>t.kind==='ut').reduce((s,t)=>s+t.amount,0);
+  p.transactions.push({ id: Date.now(), kind: 'ut', amount, time: now() });
+  const net = (totalOut + amount) - totalIn;
+  const netStr = net >= 0 ? `+${net.toLocaleString('no-NO')} kr` : `${net.toLocaleString('no-NO')} kr`;
+  addLog(`${p.name} kjøpte ut ${amount.toLocaleString('no-NO')} kr (netto: ${netStr})`);
+  document.getElementById(`co-amount-${id}`).value = '';
+  render();
+}
+
+function removeTx(playerId, txId) {
+  const p = state.players.find(x=>x.id===playerId);
+  if (!p) return;
+  const t = p.transactions.find(x=>x.id===txId);
+  if (t) addLog(`Slettet: ${p.name} ${t.kind==='inn'?'innkjøp':'uttak'} ${t.amount.toLocaleString('no-NO')} kr`);
+  p.transactions = p.transactions.filter(x=>x.id!==txId);
+  render();
+}
+
+// Forlat bordet – pengene forblir i potten (taper alt)
+function leaveTable(id) {
+  const p = state.players.find(x=>x.id===id);
+  if (!p) return;
+  const pIn = p.transactions.filter(t=>t.kind==='inn').reduce((s,t)=>s+t.amount,0);
+  const pOut = p.transactions.filter(t=>t.kind==='ut').reduce((s,t)=>s+t.amount,0);
+  const lost = pIn - pOut;
+  p.status = 'bust';
+  p.expanded = false;
+  if (lost > 0) {
+    addLog(`${p.name} forlot bordet og tapte ${lost.toLocaleString('no-NO')} kr – penger forblir i potten`);
+  } else {
+    addLog(`${p.name} forlot bordet`);
+  }
+  render();
+}
+
+// Kjøpte ut og forlot
+function cashoutAndLeave(id) {
+  const p = state.players.find(x=>x.id===id);
+  if (!p) return;
+  const amountEl = document.getElementById(`co-amount-${id}`);
+  const amount = parseFloat(amountEl ? amountEl.value : 0);
+  if (amount && amount > 0) addCashout(id);
+  p.status = 'left';
+  p.expanded = false;
+  addLog(`${p.name} kjøpte seg ut og forlot bordet`);
+  render();
+}
+
+function undoLeave(id) {
+  const p = state.players.find(x=>x.id===id);
+  if (!p) return;
+  p.status = 'active';
+  p.expanded = true;
+  addLog(`${p.name} er tilbake ved bordet`);
+  render();
+}
+
+function resetAll() {
+  if (!confirm('Starte ny session? All data slettes.')) return;
+  state = { players: [], log: [] };
+  render();
+}
+
+function render() {
+  const allTx = state.players.flatMap(p=>p.transactions);
+  const totalIn = allTx.filter(t=>t.kind==='inn').reduce((s,t)=>s+t.amount,0);
+  const totalOut = allTx.filter(t=>t.kind==='ut').reduce((s,t)=>s+t.amount,0);
+  const vippsIn = allTx.filter(t=>t.kind==='inn'&&t.method==='Vipps').reduce((s,t)=>s+t.amount,0);
+  const cashIn = allTx.filter(t=>t.kind==='inn'&&t.method==='Cash').reduce((s,t)=>s+t.amount,0);
+  const pott = totalIn - totalOut;
+  const activePlayers = state.players.filter(p=>p.status==='active').length;
+
+  document.getElementById('stat-players').textContent = activePlayers + ' / ' + state.players.length;
+  document.getElementById('stat-total').textContent = pott.toLocaleString('no-NO') + ' kr';
+  document.getElementById('stat-split').textContent = vippsIn.toLocaleString('no-NO') + ' / ' + cashIn.toLocaleString('no-NO');
+
+  const list = document.getElementById('players-list');
+  list.innerHTML = '';
+
+  if (state.players.length === 0) {
+    list.innerHTML = '<div style="font-size:13px;color:var(--color-text-tertiary);padding:8px 0;">Ingen spillere enda – legg til noen over.</div>';
+  }
+
+  state.players.forEach((p, idx) => {
+    const col = colorFor(idx);
+    const pIn = p.transactions.filter(t=>t.kind==='inn').reduce((s,t)=>s+t.amount,0);
+    const pOut = p.transactions.filter(t=>t.kind==='ut').reduce((s,t)=>s+t.amount,0);
+    const net = pOut - pIn;
+    const methods = [...new Set(p.transactions.filter(t=>t.kind==='inn').map(t=>t.method))];
+    const isActive = p.status === 'active';
+    const isBust = p.status === 'bust';
+    const isLeft = p.status === 'left';
+
+    let badgeHtml = '';
+    if (isBust) badgeHtml += '<span class="badge badge-bust">Tapte alt</span>';
+    else if (isLeft) badgeHtml += '<span class="badge badge-out">Kjøpt ut</span>';
+    if (methods.includes('Vipps') && methods.includes('Cash')) badgeHtml += '<span class="badge badge-mixed">Vipps+Cash</span>';
+    else if (methods.includes('Vipps')) badgeHtml += '<span class="badge badge-vipps">Vipps</span>';
+    else if (methods.includes('Cash')) badgeHtml += '<span class="badge badge-cash">Cash</span>';
+
+    const netClass = net > 0 ? 'pos' : net < 0 ? 'neg' : 'zero';
+    const netStr = net === 0 ? '±0 kr' : (net > 0 ? '+' : '') + net.toLocaleString('no-NO') + ' kr';
+
+    const txHtml = p.transactions.map(t => {
+      const isOut = t.kind === 'ut';
+      return `<div class="tx-row">
+        <span class="tx-type">${isOut ? '↑' : '↓'}</span>
+        <span class="tx-method">${isOut ? 'Uttak' : t.method}</span>
+        <span class="tx-amount${isOut?' out':''}">${isOut?'-':''}${t.amount.toLocaleString('no-NO')} kr</span>
+        <span class="tx-time">${t.time}</span>
+        ${isActive ? `<button class="del-btn" onclick="removeTx(${p.id},${t.id})" title="Slett">✕</button>` : ''}
+      </div>`;
+    }).join('');
+
+    const bodyHtml = p.expanded ? `
+      <div class="player-body">
+        ${isBust ? `<div class="bust-notice">Forlot bordet og tapte ${(pIn-pOut).toLocaleString('no-NO')} kr – pengene er i potten.</div>` : ''}
+        ${p.transactions.length > 0 ? `<div class="tx-list">${txHtml}</div><div class="divider"></div>` : '<div style="font-size:12px;color:var(--color-text-tertiary);margin-bottom:8px;">Ingen transaksjoner enda.</div>'}
+        ${isActive ? `
+        <div class="actions-row">
+          <div class="action-box">
+            <div class="action-title buyin-title">+ Innkjøp</div>
+            <div class="action-inputs">
+              <select id="bi-method-${p.id}">
+                <option value="Vipps">Vipps</option>
+                <option value="Cash">Cash</option>
+              </select>
+              <input type="number" id="bi-amount-${p.id}" placeholder="Beløp" min="0" step="50" onkeydown="if(event.key==='Enter')addBuyin(${p.id})" />
+              <button onclick="addBuyin(${p.id})">OK</button>
+            </div>
+          </div>
+          <div class="action-box">
+            <div class="action-title cashout-title">− Kjøp ut</div>
+            <div class="action-inputs">
+              <input type="number" id="co-amount-${p.id}" placeholder="Beløp" min="0" step="50" style="flex:1;" />
+              <button onclick="addCashout(${p.id})">OK</button>
+            </div>
+          </div>
+        </div>
+        <div class="leave-section">
+          <button class="leave-btn" onclick="leaveTable(${p.id})">Tapte alt – forlat bordet</button>
+          <button class="leave-btn" style="border-color:var(--color-border-secondary);" onclick="cashoutAndLeave(${p.id})">Kjøpt ut – forlat bordet</button>
+        </div>
+        ` : `
+        <div class="leave-section">
+          <button class="undo-btn" onclick="undoLeave(${p.id})">↩ Tilbake til bordet</button>
+          <button class="delete-btn" onclick="hardDelete(${p.id})">Slett spiller</button>
+        </div>
+        `}
+      </div>` : '';
+
+    const card = document.createElement('div');
+    card.className = 'player-card' + (!isActive ? ' left' : '');
+    card.innerHTML = `
+      <div class="player-header" onclick="togglePlayer(${p.id})">
+        <div class="player-avatar" style="background:${col.bg};color:${col.tx};">${initials(p.name)}</div>
+        <span class="player-name">${p.name}</span>
+        <div class="player-badges">${badgeHtml}</div>
+        <div class="player-right">
+          <div class="player-total">${pIn > 0 ? pIn.toLocaleString('no-NO')+' kr inn' : '—'}</div>
+          ${pIn > 0 ? `<div class="player-net ${netClass}">${netStr}</div>` : ''}
+        </div>
+        <span class="chevron${p.expanded?' open':''}">▼</span>
+      </div>
+      ${bodyHtml}
+    `;
+    list.appendChild(card);
+  });
+
+  const logEl = document.getElementById('log-section');
+  logEl.innerHTML = state.log.length === 0
+    ? '<div class="log-empty">Ingen aktivitet enda.</div>'
+    : state.log.map(l=>`<div class="log-entry">${l.time} — ${l.msg}</div>`).join('');
+}
+
+document.getElementById('session-time').textContent = 'Startet ' + now();
+render();
+</script>
