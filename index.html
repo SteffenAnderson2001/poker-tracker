@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Poker Cashgame Tracker</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f0f0f;
+      --bg2: #1a1a1a;
+      --bg3: #242424;
+      --border: rgba(255,255,255,0.08);
+      --border2: rgba(255,255,255,0.15);
+      --text: #f0f0f0;
+      --text2: #999;
+      --text3: #555;
+      --green: #4ade80;
+      --green-bg: rgba(74,222,128,0.1);
+      --red: #f87171;
+      --red-bg: rgba(248,113,113,0.1);
+      --amber: #fbbf24;
+      --amber-bg: rgba(251,191,36,0.1);
+      --blue: #60a5fa;
+      --blue-bg: rgba(96,165,250,0.1);
+      --vipps: #FF5B24;
+      --radius: 10px;
+      --radius-sm: 6px;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      padding: 0;
+    }
+
+    .app {
+      max-width: 540px;
+      margin: 0 auto;
+      padding: 24px 16px 60px;
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 24px;
+    }
+    .header-title { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+    .header-sub { font-size: 13px; color: var(--text2); margin-top: 3px; }
+    .reset-btn {
+      background: none;
+      border: 1px solid var(--border2);
+      color: var(--text2);
+      border-radius: var(--radius-sm);
+      padding: 6px 12px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .reset-btn:hover { border-color: var(--red); color: var(--red); }
+
+    /* Summary */
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+    .metric {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 14px;
+    }
+    .metric-label { font-size: 11px; color: var(--text3); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
+    .metric-value { font-size: 20px; font-weight: 700; color: var(--text); }
+    .metric-value.green { color: var(--green); }
+    .metric-value.amber { color: var(--amber); }
+
+    /* Add player */
+    .section-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 8px;
+    }
+    .add-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+    input[type="text"], input[type="number"], select {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-size: 14px;
+      padding: 0 12px;
+      height: 40px;
+      outline: none;
+      transition: border-color 0.15s;
+      width: 100%;
+    }
+    input[type="text"]:focus, input[type="number"]:focus, select:focus {
+      border-color: var(--border2);
+    }
+    input::placeholder { color: var(--text3); }
+    select option { background: #1a1a1a; }
+
+    button.primary {
+      background: var(--text);
+      color: #000;
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 0 18px;
+      height: 40px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: opacity 0.15s;
+      flex-shrink: 0;
+    }
+    button.primary:hover { opacity: 0.85; }
+
+    /* Player cards */
+    .players-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 24px; }
+    .empty-state { font-size: 13px; color: var(--text3); padding: 8px 0; }
+
+    .player-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      transition: opacity 0.2s;
+    }
+    .player-card.inactive { opacity: 0.5; }
+
+    .player-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .player-header:hover { background: rgba(255,255,255,0.02); }
+
+    .avatar {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .player-name { font-size: 14px; font-weight: 600; flex: 1; }
+    .player-badges { display: flex; gap: 4px; flex-wrap: wrap; }
+    .badge {
+      font-size: 10px; font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 20px;
+    }
+    .badge-vipps { background: var(--vipps); color: #fff; }
+    .badge-cash { background: var(--green-bg); color: var(--green); }
+    .badge-mixed { background: var(--amber-bg); color: var(--amber); }
+    .badge-bust { background: var(--red-bg); color: var(--red); }
+    .badge-left { background: var(--bg3); color: var(--text2); border: 1px solid var(--border); }
+
+    .player-right { text-align: right; flex-shrink: 0; }
+    .player-inn { font-size: 13px; font-weight: 600; }
+    .player-net { font-size: 11px; margin-top: 1px; }
+    .pos { color: var(--green); }
+    .neg { color: var(--red); }
+    .neu { color: var(--text3); }
+
+    .chevron { font-size: 10px; color: var(--text3); margin-left: 4px; transition: transform 0.2s; flex-shrink: 0; }
+    .chevron.open { transform: rotate(180deg); }
+
+    /* Player body */
+    .player-body { border-top: 1px solid var(--border); padding: 12px 14px; }
+
+    .tx-list { display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px; }
+    .tx-row {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 13px; color: var(--text2);
+      padding: 4px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .tx-row:last-child { border-bottom: none; }
+    .tx-icon { font-size: 12px; width: 14px; flex-shrink: 0; }
+    .tx-label { flex: 1; }
+    .tx-amount { font-weight: 600; color: var(--text); }
+    .tx-amount.out { color: var(--red); }
+    .tx-time { font-size: 11px; color: var(--text3); }
+    .del { background: none; border: none; color: var(--text3); cursor: pointer; font-size: 14px; padding: 0 2px; border-radius: 4px; line-height: 1; }
+    .del:hover { color: var(--red); }
+
+    .divider { height: 1px; background: var(--border); margin: 10px 0; }
+
+    .actions-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .action-box {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px;
+    }
+    .action-label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 8px;
+    }
+    .action-label.green { color: var(--green); }
+    .action-label.red { color: var(--red); }
+    .action-inputs { display: flex; gap: 5px; }
+    .action-inputs input { height: 34px; font-size: 13px; }
+    .action-inputs select { height: 34px; font-size: 13px; width: auto; flex-shrink: 0; }
+    .ok-btn {
+      background: var(--bg2);
+      border: 1px solid var(--border2);
+      color: var(--text);
+      border-radius: var(--radius-sm);
+      padding: 0 10px;
+      height: 34px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
+      transition: background 0.15s;
+    }
+    .ok-btn:hover { background: var(--bg3); }
+
+    .leave-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      padding-top: 8px;
+      border-top: 1px solid var(--border);
+    }
+    .leave-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text2);
+      border-radius: var(--radius-sm);
+      padding: 6px 12px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.15s;
+      flex: 1;
+    }
+    .leave-btn:hover { border-color: var(--red); color: var(--red); }
+
+    .inactive-row {
+      display: flex;
+      align-items: center;
+      padding-top: 8px;
+      border-top: 1px solid var(--border);
+    }
+    .undo-btn {
+      background: none; border: none;
+      color: var(--blue);
+      font-size: 12px; cursor: pointer; padding: 4px 0;
+    }
+    .undo-btn:hover { text-decoration: underline; }
+    .hard-del-btn {
+      background: none; border: none;
+      color: var(--text3);
+      font-size: 12px; cursor: pointer; padding: 4px 0;
+      margin-left: auto;
+    }
+    .hard-del-btn:hover { color: var(--red); }
+
+    .bust-notice {
+      background: var(--red-bg);
+      border: 1px solid rgba(248,113,113,0.2);
+      border-radius: var(--radius-sm);
+      padding: 8px 10px;
+      font-size: 12px;
+      color: var(--red);
+      margin-bottom: 8px;
+    }
+
+    /* Log */
+    .log-box {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 14px;
+    }
+    .log-entry { font-size: 12px; color: var(--text2); padding: 4px 0; border-bottom: 1px solid var(--border); }
+    .log-entry:last-child { border-bottom: none; }
+    .log-time { color: var(--text3); margin-right: 6px; }
+    .log-empty { font-size: 12px; color: var(--text3); }
+  </style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div>
+      <div class="header-title">🃏 Poker Cashgame</div>
+      <div class="header-sub" id="session-time"></div>
+    </div>
+    <button class="reset-btn" onclick="resetAll()">Ny session</button>
+  </div>
+
+  <div class="summary">
+    <div class="metric">
+      <div class="metric-label">Spillere</div>
+      <div class="metric-value" id="stat-players">0</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Pott</div>
+      <div class="metric-value green" id="stat-total">0 kr</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Vipps/Cash</div>
+      <div class="metric-value amber" id="stat-split">0/0</div>
+    </div>
+  </div>
+
+  <div class="section-label">Legg til spiller</div>
+  <div class="add-row">
+    <input type="text" id="new-name" placeholder="Navn..." onkeydown="if(event.key==='Enter')addPlayer()" />
+    <button class="primary" onclick="addPlayer()">Legg til</button>
+  </div>
+
+  <div class="section-label">Spillere ved bordet</div>
+  <div class="players-list" id="players-list"></div>
+
+  <div class="section-label">Aktivitetslogg</div>
+  <div class="log-box" id="log-box"><div class="log-empty">Ingen aktivitet enda.</div></div>
+</div>
+
+<script>
+  let state = JSON.parse(localStorage.getItem('poker_state') || '{"players":[],"log":[],"started":null}');
+  if (!state.started) state.started = Date.now();
+
+  const avatarColors = [
+    { bg: '#1e3a5f', tx: '#60a5fa' },
+    { bg: '#1a3a2a', tx: '#4ade80' },
+    { bg: '#3a1a1a', tx: '#f87171' },
+    { bg: '#2a1a3a', tx: '#c084fc' },
+    { bg: '#3a2a1a', tx: '#fbbf24' },
+    { bg: '#1a3a3a', tx: '#34d399' },
+  ];
+
+  function save() { localStorage.setItem('poker_state', JSON.stringify(state)); }
+  function initials(n) { return n.trim().split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2); }
+  function colorFor(i) { return avatarColors[i % avatarColors.length]; }
+  function nowStr() { return new Date().toLocaleTimeString('no-NO',{hour:'2-digit',minute:'2-digit'}); }
+  function log(msg) { state.log.unshift({t: nowStr(), msg}); if(state.log.length>40) state.log.pop(); }
+
+  function addPlayer() {
+    const inp = document.getElementById('new-name');
+    const name = inp.value.trim();
+    if (!name) return;
+    if (state.players.find(p=>p.name.toLowerCase()===name.toLowerCase())) {
+      inp.style.outline = '2px solid var(--red)';
+      setTimeout(()=>inp.style.outline='', 1200);
+      return;
+    }
+    state.players.push({ id: Date.now(), name, txs: [], expanded: true, status: 'active' });
+    log(`${name} ble lagt til bordet`);
+    inp.value = '';
+    save(); render();
+  }
+
+  function togglePlayer(id) {
+    const p = state.players.find(x=>x.id===id);
+    if (p) { p.expanded = !p.expanded; save(); render(); }
+  }
+
+  function addBuyin(id) {
+    const p = state.players.find(x=>x.id===id);
+    if (!p || p.status !== 'active') return;
+    const method = document.getElementById('bi-m-'+id).value;
+    const amount = parseFloat(document.getElementById('bi-a-'+id).value);
+    if (!amount || amount <= 0) return;
+    p.txs.push({ id: Date.now(), kind: 'inn', method, amount, t: nowStr() });
+    log(`${p.name} kjøpte inn ${fmt(amount)} via ${method}`);
+    document.getElementById('bi-a-'+id).value = '';
+    save(); render();
+  }
+
+  function addCashout(id) {
+    const p = state.players.find(x=>x.id===id);
+    if (!p || p.status !== 'active') return;
+    const amount = parseFloat(document.getElementById('co-a-'+id).value);
+    if (!amount || amount <= 0) return;
+    const inn = p.txs.filter(t=>t.kind==='inn').reduce((s,t)=>s+t.amount,0);
+    const ut = p.txs.filter(t=>t.kind==='ut').reduce((s,t)=>s+t.amount,0);
+    p.txs.push({ id: Date.now(), kind: 'ut', amount, t: nowStr() });
+    const net = (ut + amount) - inn;
+    log(`${p.name} tok ut ${fmt(amount)} (netto: ${net>=0?'+':''}${fmt(net)})`);
+    document.getElementById('co-a-'+id).value = '';
+    save(); render();
+  }
+
+  function removeTx(pid, tid) {
+    const p = state.players.find(x=>x.id===pid);
+    if (!p) return;
+    const tx = p.txs.find(x=>x.id===tid);
+    if (tx) log(`Slettet: ${p.name} ${tx.kind==='inn'?'innkjøp':'uttak'} ${fmt(tx.amount)}`);
+    p.txs = p.txs.filter(x=>x.id!==tid);
+    save(); render();
+  }
+
+  function leaveTable(id) {
+    const p = state.players.find(x=>x.id===id);
+    if (!p) return;
+    const inn = p.txs.filter(t=>t.kind==='inn').reduce((s,t)=>s+t.amount,0);
+    const ut = p.txs.filter(t=>t.kind==='ut').reduce((s,t)=>s+t.amount,0);
+    const lost = inn - ut;
+    p.status = 'bust'; p.expanded = false;
+    log(`${p.name} forlot bordet og tapte ${fmt(lost)} – pengene er i potten`);
+    save(); render();
+  }
+
+  function leaveWithCashout(id) {
+    const p = state.players.find(x=>x.id===id);
+    if (!p) return;
+    const amount = parseFloat(document.getElementById('co-a-'+id).value);
+    if (amount && amount > 0) addCashout(id);
+    const pFresh = state.players.find(x=>x.id===id);
+    if (pFresh) { pFresh.status = 'left'; pFresh.expanded = false; }
+    log(`${p.name} kjøpte seg ut og forlot bordet`);
+    save(); render();
+  }
+
+  function undoLeave(id) {
+    const p = state.players.find(x=>x.id===id);
+    if (!p) return;
+    p.status = 'active'; p.expanded = true;
+    log(`${p.name} er tilbake ved bordet`);
+    save(); render();
+  }
+
+  function hardDelete(id) {
+    state.players = state.players.filter(x=>x.id!==id);
+    save(); render();
+  }
+
+  function resetAll() {
+    if (!confirm('Starte ny session? All data slettes.')) return;
+    state = { players: [], log: [], started: Date.now() };
+    save(); render();
+  }
+
+  function fmt(n) { return Math.round(n).toLocaleString('no-NO') + ' kr'; }
+
+  function render() {
+    const allTxs = state.players.flatMap(p=>p.txs);
+    const totalIn = allTxs.filter(t=>t.kind==='inn').reduce((s,t)=>s+t.amount,0);
+    const totalOut = allTxs.filter(t=>t.kind==='ut').reduce((s,t)=>s+t.amount,0);
+    const vipps = allTxs.filter(t=>t.kind==='inn'&&t.method==='Vipps').reduce((s,t)=>s+t.amount,0);
+    const cash = allTxs.filter(t=>t.kind==='inn'&&t.method==='Cash').reduce((s,t)=>s+t.amount,0);
+    const active = state.players.filter(p=>p.status==='active').length;
+
+    document.getElementById('stat-players').textContent = active + '/' + state.players.length;
+    document.getElementById('stat-total').textContent = fmt(totalIn - totalOut);
+    document.getElementById('stat-split').textContent = Math.round(vipps).toLocaleString('no-NO') + '/' + Math.round(cash).toLocaleString('no-NO');
+
+    const started = new Date(state.started);
+    document.getElementById('session-time').textContent = 'Startet ' + started.toLocaleTimeString('no-NO',{hour:'2-digit',minute:'2-digit'});
+
+    const list = document.getElementById('players-list');
+    list.innerHTML = '';
+
+    if (state.players.length === 0) {
+      list.innerHTML = '<div class="empty-state">Ingen spillere enda – legg til noen over.</div>';
+    }
+
+    state.players.forEach((p, idx) => {
+      const col = colorFor(idx);
+      const inn = p.txs.filter(t=>t.kind==='inn').reduce((s,t)=>s+t.amount,0);
+      const ut = p.txs.filter(t=>t.kind==='ut').reduce((s,t)=>s+t.amount,0);
+      const net = ut - inn;
+      const methods = [...new Set(p.txs.filter(t=>t.kind==='inn').map(t=>t.method))];
+      const isActive = p.status === 'active';
+      const isBust = p.status === 'bust';
+
+      let badges = '';
+      if (isBust) badges += '<span class="badge badge-bust">Tapte alt</span>';
+      else if (p.status === 'left') badges += '<span class="badge badge-left">Kjøpt ut</span>';
+      if (methods.includes('Vipps') && methods.includes('Cash')) badges += '<span class="badge badge-mixed">Vipps+Cash</span>';
+      else if (methods.includes('Vipps')) badges += '<span class="badge badge-vipps">Vipps</span>';
+      else if (methods.includes('Cash')) badges += '<span class="badge badge-cash">Cash</span>';
+
+      const netCls = net > 0 ? 'pos' : net < 0 ? 'neg' : 'neu';
+      const netStr = net === 0 ? '±0 kr' : (net > 0 ? '+' : '') + fmt(net);
+
+      const txRows = p.txs.map(tx => {
+        const isOut = tx.kind === 'ut';
+        return `<div class="tx-row">
+          <span class="tx-icon">${isOut ? '↑' : '↓'}</span>
+          <span class="tx-label">${isOut ? 'Uttak' : tx.method}</span>
+          <span class="tx-amount${isOut?' out':''}">${isOut?'-':''}${fmt(tx.amount)}</span>
+          <span class="tx-time">${tx.t}</span>
+          ${isActive ? `<button class="del" onclick="removeTx(${p.id},${tx.id})">✕</button>` : ''}
+        </div>`;
+      }).join('');
+
+      const bodyHtml = p.expanded ? `<div class="player-body">
+        ${isBust ? `<div class="bust-notice">Forlot bordet og tapte ${fmt(inn-ut)} – pengene er i potten.</div>` : ''}
+        ${p.txs.length > 0 ? `<div class="tx-list">${txRows}</div><div class="divider"></div>` : '<div style="font-size:12px;color:var(--text3);margin-bottom:10px;">Ingen transaksjoner enda.</div>'}
+        ${isActive ? `
+        <div class="actions-grid">
+          <div class="action-box">
+            <div class="action-label green">+ Innkjøp</div>
+            <div class="action-inputs">
+              <select id="bi-m-${p.id}">
+                <option value="Vipps">Vipps</option>
+                <option value="Cash">Cash</option>
+              </select>
+              <input type="number" id="bi-a-${p.id}" placeholder="kr" min="0" step="50" onkeydown="if(event.key==='Enter')addBuyin(${p.id})" />
+              <button class="ok-btn" onclick="addBuyin(${p.id})">OK</button>
+            </div>
+          </div>
+          <div class="action-box">
+            <div class="action-label red">− Kjøp ut</div>
+            <div class="action-inputs">
+              <input type="number" id="co-a-${p.id}" placeholder="kr" min="0" step="50" style="flex:1;" onkeydown="if(event.key==='Enter')addCashout(${p.id})" />
+              <button class="ok-btn" onclick="addCashout(${p.id})">OK</button>
+            </div>
+          </div>
+        </div>
+        <div class="leave-row">
+          <button class="leave-btn" onclick="leaveTable(${p.id})">Tapte alt – forlat bordet</button>
+          <button class="leave-btn" onclick="leaveWithCashout(${p.id})">Kjøpt ut – forlat bordet</button>
+        </div>` : `
+        <div class="inactive-row">
+          <button class="undo-btn" onclick="undoLeave(${p.id})">↩ Tilbake til bordet</button>
+          <button class="hard-del-btn" onclick="hardDelete(${p.id})">Slett spiller</button>
+        </div>`}
+      </div>` : '';
+
+      const card = document.createElement('div');
+      card.className = 'player-card' + (!isActive ? ' inactive' : '');
+      card.innerHTML = `
+        <div class="player-header" onclick="togglePlayer(${p.id})">
+          <div class="avatar" style="background:${col.bg};color:${col.tx};">${initials(p.name)}</div>
+          <span class="player-name">${p.name}</span>
+          <div class="player-badges">${badges}</div>
+          <div class="player-right">
+            <div class="player-inn">${inn > 0 ? fmt(inn) + ' inn' : '—'}</div>
+            ${inn > 0 ? `<div class="player-net ${netCls}">${netStr}</div>` : ''}
+          </div>
+          <span class="chevron${p.expanded?' open':''}">▾</span>
+        </div>
+        ${bodyHtml}
+      `;
+      list.appendChild(card);
+    });
+
+    const logBox = document.getElementById('log-box');
+    logBox.innerHTML = state.log.length === 0
+      ? '<div class="log-empty">Ingen aktivitet enda.</div>'
+      : state.log.map(l=>`<div class="log-entry"><span class="log-time">${l.t}</span>${l.msg}</div>`).join('');
+  }
+
+  render();
+</script>
+</body>
+</html>
